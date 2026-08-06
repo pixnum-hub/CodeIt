@@ -669,6 +669,7 @@ function insertText(text){
     const s = code.selectionStart, en = code.selectionEnd;
     code.setRangeText(text, s, en, 'end');
     queueEditorUpdate();
+    queuePersist();
   }
 }
 function insertTextRange(start, end, text){
@@ -946,7 +947,7 @@ function getCaretCoords(ta){
   span.textContent = ta.value.slice(ta.selectionStart) || '.';
   div.appendChild(span);
   document.body.appendChild(div);
-  const coords = {left: span.offsetLeft, top: span.offsetTop - ta.scrollTop, height: parseInt(cs.lineHeight) || 18};
+  const coords = {left: span.offsetLeft - ta.scrollLeft, top: span.offsetTop - ta.scrollTop, height: parseInt(cs.lineHeight) || 18};
   document.body.removeChild(div);
   return coords;
 }
@@ -1076,14 +1077,14 @@ code.addEventListener('keydown', e => {
     }
     return;
   }
-  if(PAIRS[e.key] && s === en){
+  if(CLOSERS.has(e.key) && v[s] === e.key && s === en){
     e.preventDefault();
-    insertText(e.key + PAIRS[e.key]);
     code.setSelectionRange(s + 1, s + 1);
     return;
   }
-  if(CLOSERS.has(e.key) && v[s] === e.key && s === en){
+  if(PAIRS[e.key] && s === en){
     e.preventDefault();
+    insertText(e.key + PAIRS[e.key]);
     code.setSelectionRange(s + 1, s + 1);
     return;
   }
